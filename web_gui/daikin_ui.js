@@ -1,14 +1,18 @@
-var request_control_loading = 0;
-var request_sensor_loading = 0;
-var timer = 5000; //millisecond
+// Global variables for tracking request states and timing
+var request_control_loading = 0;        // Flag for control request in progress
+var request_sensor_loading = 0;         // Flag for sensor request in progress
+var timer = 5000;                       // Polling interval in milliseconds
 
-var control_response;
-var control_timeout;
+// Store responses and timeouts
+var control_response;                   // Stores the last control state
+var control_timeout;                    // Timer for control polling
+var sensor_response;                    // Stores the last sensor readings
+var sensor_timeout;                     // Timer for sensor polling
 
-var sensor_response;
-var sensor_timeout;
-
-
+/**
+ * Fetches current AC control state from the server
+ * Gets power state, mode, temperature, fan settings, etc.
+ */
 function request_control() {
 	
 	var target="api.php";
@@ -40,6 +44,10 @@ function request_control() {
 	set_loading(1);
 }
 
+/**
+ * Sends control commands to the AC unit
+ * @param {Object} opts - Control options (power, mode, temperature, etc.)
+ */
 function send_control(opts){
 	var target="api.php";
 	var request="POST";
@@ -64,6 +72,10 @@ function send_control(opts){
 		
 }
 
+/**
+ * Fetches sensor data from the AC unit
+ * Gets room temperature and outside temperature
+ */
 function request_sensor(){
 	
 	var target="api.php";
@@ -96,6 +108,11 @@ function request_sensor(){
 	set_loading(1);
 }
 
+/**
+ * Handles the response from control requests
+ * Updates UI elements to reflect current AC state
+ * @param {Object} response - Control state from AC
+ */
 function control_response_handler(response){
 	reset_wing();
 	reset_fan();
@@ -160,11 +177,21 @@ function control_response_handler(response){
 	set_wing(parseInt(response.f_dir));
 }
 
+/**
+ * Handles the response from sensor requests
+ * Updates temperature displays
+ * @param {Object} response - Sensor data from AC
+ */
 function sensor_response_handler(response){
 	set_home_temp(parseInt(response.htemp));
 	set_outside_temp(parseInt(response.otemp));
 }
 
+/**
+ * Filters control options to include only necessary parameters
+ * @param {Object} opt - Full options object
+ * @returns {Object} - Filtered options
+ */
 function minimize_opt(opt){
 	var min_opt = {};
 	
@@ -187,6 +214,10 @@ function minimize_opt(opt){
 //----------ON CLICK FUNCTIONS------------
 
 
+/**
+ * Handles mode changes (cooling, heating, etc.)
+ * @param {string} num - Mode number
+ */
 function mode_onclick(num){
 	if(!control_response) return;
 	var temp = minimize_opt(control_response);
@@ -203,6 +234,9 @@ function mode_onclick(num){
 	update();
 }
 
+/**
+ * Toggles AC power state
+ */
 function power_onclick(){
 	if(!control_response) return;
 	var temp = minimize_opt(control_response);
@@ -211,6 +245,10 @@ function power_onclick(){
 	update();
 }
 
+/**
+ * Changes fan speed level
+ * @param {number} level - Fan speed setting
+ */
 function fan_onclick(level){
 	if(!control_response) return;
 	var temp = minimize_opt(control_response);
@@ -219,6 +257,7 @@ function fan_onclick(level){
 	update();
 }
 
+/*
 function wing_onclick(num){
 	if(!control_response) return;
 	var temp = minimize_opt(control_response);
@@ -229,8 +268,12 @@ function wing_onclick(num){
 	}
 	send_control(temp);
 	update();
-}
+}*/
 
+/**
+ * Adjusts target temperature
+ * @param {number} inc - Temperature increment (+1 or -1)
+ */
 function temp_onclick(inc){
 	if(!control_response) return;
 	var temp = minimize_opt(control_response);
@@ -242,6 +285,10 @@ function temp_onclick(inc){
 
 //---------GUI SET FUNCTIONS------------
 
+/**
+ * Updates power button display
+ * @param {boolean} boolean - Power state
+ */
 function set_power(boolean){
 	power = document.getElementById("power")
 	if(boolean){
@@ -251,6 +298,9 @@ function set_power(boolean){
 	}
 }
 
+/**
+ * Resets mode button styling
+ */
 function reset_mode(){
 	var mode_list= document.getElementsByClassName("mode-btn btn-info");
 	
@@ -259,6 +309,15 @@ function reset_mode(){
 	}
 }
 
+/**
+ * Updates mode button to show current mode
+ * @param {number} mode - AC operation mode
+ * 0/1/7: Auto
+ * 2: Dehumidify
+ * 3: Cooling
+ * 4: Heating
+ * 6: Fan only
+ */
 function set_mode(mode){
 	if(mode === 1 || mode === 7) mode = 0;
 	
@@ -288,10 +347,18 @@ function set_mode(mode){
 	}
 }
 
+/**
+ * Updates room temperature display
+ * @param {number} temp - Room temperature
+ */
 function set_home_temp(temp){
 	document.getElementById("home_temp").innerHTML=" "+temp+" C";	
 }
 
+/**
+ * Updates outdoor temperature display
+ * @param {number} temp - Outdoor temperature
+ */
 function set_outside_temp(temp){
 	document.getElementById("outside_temp").innerHTML=" "+temp+" C";
 }
@@ -328,6 +395,10 @@ function set_target_temp_arrow(inc,boolean){
 	
 }
 
+/**
+ * Updates fan speed indicator
+ * @param {number} f_mode - Fan speed level (1-7)
+ */
 function set_fan(f_mode){				
 	switch(f_mode){
 		case 1:
@@ -369,6 +440,9 @@ function set_fan_img(num){
 	}
 }
 
+/**
+ * Resets fan control UI elements
+ */
 function reset_fan(){
 	var fan_list= document.getElementsByClassName("fan-btn");
 	for(var i=0; i<fan_list.length; ++i){
@@ -411,7 +485,10 @@ function set_wing(wing_mode){
 	}
 }
 
-
+/**
+ * Shows/hides loading spinner
+ * @param {boolean} boolean - Show/hide state
+ */
 function set_loading(boolean){
 	var spinner = document.getElementById("spinner");
 	if(boolean){
@@ -421,6 +498,11 @@ function set_loading(boolean){
 	}
 }
 
+/**
+ * Shows/hides alert messages
+ * @param {boolean} boolean - Show/hide state
+ * @param {string} mex - Message to display
+ */
 function set_alert(boolean,mex){
 	var alert = document.getElementById("alert");
 	if(boolean){
@@ -435,6 +517,10 @@ function set_alert(boolean,mex){
 	}
 }
 
+/**
+ * Updates all AC state information
+ * Clears existing timeouts and requests fresh data
+ */
 function update(){
 	clearTimeout(control_timeout);
 	clearTimeout(sensor_timeout);
@@ -444,4 +530,5 @@ function update(){
 		request_sensor();
 }
 
+// Start polling for updates
 update();
