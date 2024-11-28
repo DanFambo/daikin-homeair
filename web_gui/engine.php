@@ -2,8 +2,9 @@
 
 //retrive infos encoded in php array
 function get_array_info($uri,$aircon_ip){
+	global $base_path;
 	
-	$url= "http://$aircon_ip$uri";
+	$url= "http://$aircon_ip$base_path$uri";
 	$data = @file_get_contents($url);
 	if($data === FALSE){
 		return FALSE;
@@ -28,7 +29,9 @@ function get_json_info($uri,$aircon_ip){
 
 
 function set_array_info($uri,$aircon_ip,$parameters){
-	$url= "http://$aircon_ip$uri";
+	global $base_path;
+	
+	$url= "http://$aircon_ip$base_path$uri";
 	$context= stream_context_create(NULL,$parameters);
 	$data= file_get_contents ( $url . '?' . http_build_query($parameters));
 	if($data === FALSE){
