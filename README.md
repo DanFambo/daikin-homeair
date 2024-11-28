@@ -1,6 +1,6 @@
 Daikin-Control
 ==============
-
+New version
 ![Web Gui Preview](https://raw.githubusercontent.com/ael-code/daikin-control/master/web_gui.png)
 
 The '''Daikin Emura FTXG-L''' air conditioner comes with a wifi module preinstalled that allows you to control it via internet.
